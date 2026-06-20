@@ -1,87 +1,91 @@
 # 昌叔助手 - 大模型配置指南
 
-## 🎉 大模型功能已添加！
+## 支持的大模型提供商
 
-昌叔助手现在支持连接大模型了！配置后可以获得真正的AI回答。
+- OpenAI兼容格式 (NVIDIA/DeepSeek/GLM/OpenRouter等)
+- Anthropic格式
+- 自定义API端点
 
-## 📋 支持的大模型提供商
-
-- **OpenAI** (GPT-3.5, GPT-4等)
-- **Anthropic** (Claude等)
-- **自定义API** (兼容OpenAI格式的API)
-
-## 🔧 配置步骤
+## 配置步骤
 
 ### 1. 编辑配置文件
 
 ```bash
 cd /Users/a1234/.hermes/skills/devops/changshu-dev-assistant
-
-# 编辑配置文件
 vi config.yaml
-# 或
-nano config.yaml
-# 或
-open config.yaml
 ```
 
-### 2. 配置大模型API
+### 2. 通过环境变量配置（推荐）
 
-找到 `ai` 部分，修改配置：
+敏感信息均通过环境变量注入，不要在config.yaml中明文填写：
+
+```bash
+export LLM_PROVIDER="openai"        # API格式: openai(兼容格式)/anthropic/custom
+export LLM_API_KEY="your-api-key"   # API密钥
+export LLM_API_BASE="https://your-api-endpoint/v1"  # API基础URL
+export LLM_MODEL_NAME="your-model-name"  # 模型名称
+```
+
+环境变量优先级高于config.yaml。
+
+### 3. 通过配置文件设置
+
+在 `config.yaml` 的 `ai` 段配置：
 
 ```yaml
 ai:
-  model: "local"
   temperature: 0.7
   max_tokens: 2000
   context_window: 4000
-  # 大模型API配置
-  provider: "openai"  # openai, anthropic, local, custom
-  api_key: "你的API密钥"  # 在这里填入你的API密钥
-  api_base: ""  # 自定义API端点，如需要
-  model_name: "gpt-3.5-turbo"  # 使用的模型名称
-  timeout: 30  # 请求超时时间（秒）
+  provider: ""      # 通过环境变量LLM_PROVIDER设置
+  api_key: ""       # 通过环境变量LLM_API_KEY设置，勿明文填写
+  api_base: ""      # 通过环境变量LLM_API_BASE设置
+  model_name: ""    # 通过环境变量LLM_MODEL_NAME设置
+  timeout: 120
 ```
 
-### 3. 配置示例
+### 4. 配置示例
 
-#### OpenAI配置
+#### OpenAI兼容格式（NVIDIA/DeepSeek/GLM等）
 
 ```yaml
 ai:
-  provider: "openai"
-  api_key: "sk-xxxxxxxxxxxxxxxxxxxxxxxx"
-  model_name: "gpt-3.5-turbo"
+  provider: "openai"  # 兼容格式
+  # api_key, api_base, model_name 通过环境变量设置
   temperature: 0.7
   max_tokens: 2000
 ```
 
-#### Anthropic配置
+对应环境变量：
+```bash
+export LLM_API_BASE="https://integrate.api.nvidia.com/v1"
+export LLM_MODEL_NAME="your-model-name"
+export LLM_API_KEY="your-api-key"
+```
+
+#### Anthropic格式
 
 ```yaml
 ai:
   provider: "anthropic"
-  api_key: "sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx"
-  model_name: "claude-3-sonnet-20240229"
+  # api_key, api_base, model_name 通过环境变量设置
   temperature: 0.7
   max_tokens: 2000
 ```
 
-#### 自定义API配置
+#### 自定义API端点
 
 ```yaml
 ai:
   provider: "custom"
-  api_key: "你的API密钥"
-  api_base: "https://your-api-endpoint.com/v1/chat"
-  model_name: "your-model-name"
+  # api_key, api_base, model_name 通过环境变量设置
   temperature: 0.7
   max_tokens: 2000
 ```
 
-## 🚀 使用方法
+## 使用方法
 
-配置完成后，就可以使用大模型功能了：
+配置完成后：
 
 ```bash
 cd /Users/a1234/.hermes/skills/devops/changshu-dev-assistant
@@ -93,78 +97,39 @@ cd /Users/a1234/.hermes/skills/devops/changshu-dev-assistant
 csa chat
 ```
 
-## 💬 使用示例
+## 注意事项
 
-```
-昌叔助手 > 如何优化达梦数据库查询？
-昌叔助手 > status
-昌叔助手 > diagnose
-昌叔助手 > quit
-```
+1. API密钥安全：不要将API密钥提交到公开仓库，务必通过环境变量设置
+2. 费用控制：注意API调用费用，设置合理的max_tokens
+3. 网络连接：确保网络可以访问API端点
+4. 超时设置：根据网络情况调整timeout参数
 
-## ⚠️ 注意事项
-
-1. **API密钥安全**：不要将API密钥提交到公开仓库
-2. **费用控制**：注意API调用费用，设置合理的max_tokens
-3. **网络连接**：确保网络可以访问API端点
-4. **超时设置**：根据网络情况调整timeout参数
-
-## 🔍 故障排查
+## 故障排查
 
 ### 问题1：仍然返回模板响应
 
-**原因**：API密钥未配置或配置错误
+原因：API密钥未配置或配置错误
 
-**解决**：
-1. 检查config.yaml中的api_key是否正确
+解决：
+1. 检查环境变量LLM_API_KEY是否设置
 2. 确认provider设置正确
 3. 检查网络连接
 
 ### 问题2：调用大模型失败
 
-**原因**：网络问题或API配置错误
+原因：网络问题或API配置错误
 
-**解决**：
+解决：
 1. 检查网络连接
-2. 确认API端点可访问
+2. 确认LLM_API_BASE端点可访问
 3. 检查API密钥是否有效
 4. 查看错误信息
 
 ### 问题3：响应很慢
 
-**原因**：网络延迟或模型选择
+原因：网络延迟或模型选择
 
-**解决**：
+解决：
 1. 增加timeout参数
-2. 选择更快的模型（如gpt-3.5-turbo）
+2. 选择响应更快的模型(通过LLM_MODEL_NAME环境变量切换)
 3. 减少max_tokens
-
-## 📚 相关文档
-
-- `CHAT_GUIDE.md` - Chat功能使用说明
-- `SIMPLE_GUIDE.md` - 超简单使用指南
-- `README.md` - 完整使用文档
-
-## 🎯 推荐配置
-
-对于日常使用，推荐以下配置：
-
-```yaml
-ai:
-  provider: "openai"
-  api_key: "你的API密钥"
-  model_name: "gpt-3.5-turbo"
-  temperature: 0.7
-  max_tokens: 2000
-  timeout: 30
-```
-
-这个配置平衡了响应速度、质量和成本。
-
-## 💡 提示
-
-- 如果没有API密钥，助手会返回模板响应，并提示配置
-- 配置API密钥后，助手会提供真正的AI回答
-- 可以随时修改配置文件来调整参数
-
-有问题随时问我！
