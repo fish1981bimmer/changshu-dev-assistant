@@ -60,9 +60,9 @@ vi config.yaml
 
 ```yaml
 ai:
-  provider: "openai"
-  api_key: "你的API密钥"
-  model_name: "gpt-3.5-turbo"
+  provider: ""  # 通过环境变量LLM_PROVIDER设置
+  api_key: ""  # 通过环境变量LLM_API_KEY设置，勿明文填写
+  model_name: ""  # 通过环境变量LLM_MODEL_NAME设置
 ```
 
 然后使用：
@@ -120,9 +120,9 @@ ai:
 
 ```yaml
 ai:
-  provider: "openai"
-  api_key: "你的API密钥"
-  model_name: "gpt-3.5-turbo"
+  provider: ""  # 通过环境变量LLM_PROVIDER设置
+  api_key: ""  # 通过环境变量LLM_API_KEY设置，勿明文填写
+  model_name: ""  # 通过环境变量LLM_MODEL_NAME设置
   temperature: 0.7
   max_tokens: 2000
   timeout: 30
