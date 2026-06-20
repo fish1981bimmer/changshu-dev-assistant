@@ -222,10 +222,10 @@ assistant:
   language: "zh-CN"
 
 ai:
-  provider: "openai"  # 或 "anthropic" 或 "custom"
-  api_key: "your-api-key"
-  api_base: "https://api.openai.com/v1"  # 可选
-  model_name: "gpt-3.5-turbo"
+  provider: ""  # openai(兼容格式)/anthropic/custom, 通过环境变量LLM_PROVIDER设置
+  api_key: ""   # 通过环境变量LLM_API_KEY设置，勿明文填写
+  api_base: ""  # 通过环境变量LLM_API_BASE设置
+  model_name: ""  # 通过环境变量LLM_MODEL_NAME设置
   temperature: 0.7
   max_tokens: 2000
   timeout: 30
