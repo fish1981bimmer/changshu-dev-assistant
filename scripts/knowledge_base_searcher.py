@@ -15,11 +15,13 @@ from collections import Counter
 class KnowledgeBaseSearcher:
     """知识库搜索器"""
     
-    def __init__(self, wiki_path: str = "/Users/a1234/wiki"):
+    def __init__(self, wiki_path: str = ""):
         """初始化知识库搜索器"""
+        if not wiki_path:
+            wiki_path = os.environ.get('WIKI_PATH', os.path.expanduser('~/wiki'))
         self.wiki_path = wiki_path
         self.index_file = os.path.join(wiki_path, "index.md")
-        self.schema_file = os.path. join(wiki_path, "SCHEMA.md")
+        self.schema_file = os.path.join(wiki_path, "SCHEMA.md")
         self.log_file = os.path.join(wiki_path, "log.md")
         
         # 缓存搜索结果

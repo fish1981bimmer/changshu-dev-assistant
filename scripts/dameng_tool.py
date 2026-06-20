@@ -882,7 +882,7 @@ END {name};
     # ---------------------------------------------------------------
 
     def test_connect(self, host: str = 'localhost', port: int = 5236,
-                     user: str = 'SYSDBA', password: str = 'SYSDBA',
+                     user: str = '', password: str = '',
                      schema: str = None) -> Dict:
         """测试达梦数据库连接（需要dmPython，可选依赖）
 
@@ -896,6 +896,14 @@ END {name};
         Returns:
             包含连接状态和基本信息的字典
         """
+        if not user or not password:
+            return {
+                "host": host, "port": port, "user": user,
+                "connected": False,
+                "server_info": None,
+                "error": "请提供用户名和密码: test connect <host> <port> <user> <password>"
+            }
+
         result = {
             "host": host,
             "port": port,
@@ -1098,7 +1106,7 @@ def main():
         print("  python dameng-tool.py procedure sp_report")
         print("  python dameng-tool.py function fn_calc RETURN_TYPE")
         print("  python dameng-tool.py trigger trg_audit orders 'AFTER INSERT'")
-        print("  python dameng-tool.py test connect 192.168.1.100 5236 SYSDBA pwd123")
+        print("  python dameng-tool.py test connect <host> <port> <user> <password>")
         print("  python dameng-tool.py sql format my_query.sql")
         print("  python dameng-tool.py search investment stock")
         return
@@ -1238,8 +1246,8 @@ def main():
             return
         host = sys.argv[3] if len(sys.argv) > 3 else 'localhost'
         port = int(sys.argv[4]) if len(sys.argv) > 4 else 5236
-        user = sys.argv[5] if len(sys.argv) > 5 else 'SYSDBA'
-        password = sys.argv[6] if len(sys.argv) > 6 else 'SYSDBA'
+        user = sys.argv[5] if len(sys.argv) > 5 else ''
+        password = sys.argv[6] if len(sys.argv) > 6 else ''
         result = tool.test_connect(host=host, port=port, user=user, password=password)
         print(tool.format_connect_result(result))
         if not result["connected"]:
