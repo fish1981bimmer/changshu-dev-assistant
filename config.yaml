@@ -1,0 +1,64 @@
+# 昌叔专属软件开发助手配置文件
+
+assistant:
+  name: "昌叔助手"
+  personality: "专业、高效、贴心"
+  language: "zh-CN"
+  
+features:
+  system: true
+  code: true
+  database: true
+  ai: true
+  knowledge: true
+  
+integrations:
+  claude_code:
+    enabled: true
+    path: "/usr/local/bin/claude"
+    auto_sync: true
+    
+preferences:
+  output_format: "structured"  # structured, detailed, concise
+  code_style: "pep8"  # pep8, google, custom
+  db_type: "dameng"  # dameng, mysql, postgresql
+  ai_provider: "openai"  # local, openai, anthropic
+  timezone: "Asia/Shanghai"
+  work_hours: "non-work"  # work, non-work, all
+  
+database:
+  dameng:
+    default_port: 5236
+    charset: "UTF-8"
+    optimization_hints: true
+    
+system:
+  monitor_interval: 60  # seconds
+  log_retention_days: 30
+  alert_threshold:
+    cpu: 80
+    memory: 85
+    disk: 90
+    
+ai:
+  model: "openai"
+  temperature: 0.7
+  max_tokens: 2000
+  context_window: 4000
+  # 大模型API配置
+  provider: "openai"  # NVIDIA API兼容OpenAI格式
+  api_key: "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"  # NVIDIA API密钥
+  api_base: "https://integrate.api.nvidia.com/v1"  # NVIDIA API基础URL
+  model_name: "minimaxai/minimax-m2.7"  # 使用Llama模型
+  timeout: 120  # 请求超时时间（秒）- 增加到120秒
+  
+knowledge:
+  auto_index: true
+  search_depth: 3
+  relevance_threshold: 0.7
+  
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "changshu-assistant.log"
+  max_size: "10MB"
+  backup_count: 5

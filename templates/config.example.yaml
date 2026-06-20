@@ -1,0 +1,51 @@
+# 昌叔专属软件开发助手配置文件模板
+
+```yaml
+assistant:
+  name: "昌叔助手"
+  personality: "专业、高效、贴心"
+  language: "zh-CN"
+
+features:
+  system: true
+  code: true
+  database: true
+  ai: true
+  knowledge: true
+
+integrations:
+  claude_code:
+    enabled: true
+    path: "/usr/local/bin/claude"
+
+preferences:
+  output_format: "structured"
+  code_style: "pep8"
+  db_type: "dameng"
+  ai_provider: "local"
+
+# 性能监控配置
+performance:
+  monitoring:
+    enabled: true
+    interval: 30
+  thresholds:
+    cpu: 80
+    memory: 85
+    disk: 90
+
+# 错误诊断配置
+error_diagnosis:
+  patterns:
+    database:
+      - "ORA-"
+      - "DM-"
+      - "SQL syntax"
+    system:
+      - "Segmentation fault"
+      - "Memory leak"
+      - "Permission denied"
+  solutions:
+    auto_generate: true
+    save_to_knowledge: true
+```

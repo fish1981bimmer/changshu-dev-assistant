@@ -1,0 +1,47 @@
+{
+  "database": {
+    "ORA-00942": {
+      "description": "表或视图不存在",
+      "solution": "检查表名是否正确，确认表已创建",
+      "example": "SELECT * FROM existing_table"
+    },
+    "ORA-00904": {
+      "description": "标识符无效",
+      "solution": "检查列名是否正确",
+      "example": "SELECT valid_column FROM table"
+    },
+    "DM-00001": {
+      "description": "违反唯一约束",
+      "solution": "检查重复数据，确保唯一性",
+      "example": "INSERT INTO table (id, name) VALUES (1, 'test')"
+    }
+  },
+  "python": {
+    "NameError": {
+      "description": "名称未定义",
+      "solution": "检查变量名拼写，确保变量已定义"
+    },
+    "TypeError": {
+      "description": "类型错误",
+      "solution": "检查数据类型匹配",
+      "example": "str(123) + \"abc\""
+    },
+    "ImportError": {
+      "description": "导入错误",
+      "solution": "检查模块名，确保已安装",
+      "example": "import numpy"
+    }
+  },
+  "system": {
+    "Segmentation fault": {
+      "description": "段错误",
+      "solution": "检查指针操作，内存访问越界",
+      "example": "避免空指针解引用"
+    },
+    "Permission denied": {
+      "description": "权限不足",
+      "solution": "检查文件权限，使用sudo或修改权限",
+      "example": "chmod +x script.sh"
+    }
+  }
+}
