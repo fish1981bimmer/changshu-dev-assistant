@@ -129,7 +129,7 @@ python scripts/changshu-assistant.py prompt --file system_prompt.txt
 python scripts/changshu-assistant.py model-integrate --provider openai
 
 # 性能评估
-python scripts/changshu-assistant.py evaluate --model gpt-4
+python scripts/changshu_assistant_main.py chat  # 模型通过环境变量配置
 ```
 
 ## 配置说明
