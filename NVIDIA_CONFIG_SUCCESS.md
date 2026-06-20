@@ -8,31 +8,32 @@
 
 ```yaml
 ai:
-  model: "openai"
+  model: ""  # 通过环境变量设置
   temperature: 0.7
   max_tokens: 2000
   context_window: 4000
-  # 大模型API配置
-  provider: "openai"  # NVIDIA API兼容OpenAI格式
-  api_key: "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"  # NVIDIA API密钥
-  api_base: "https://integrate.api.nvidia.com/v1"  # NVIDIA API基础URL
-  model_name: "meta/llama-3.1-405b-instruct"  # 使用Llama模型
-  timeout: 120  # 请求超时时间（秒）- 增加到120秒
+  # 大模型API配置 — 敏感信息通过环境变量注入
+  provider: ""  # 通过环境变量LLM_PROVIDER设置
+  api_key: ""   # 通过环境变量LLM_API_KEY设置，勿明文填写
+  api_base: ""  # 通过环境变量LLM_API_BASE设置
+  model_name: ""  # 通过环境变量LLM_MODEL_NAME设置
+  timeout: 120
 ```
 
 ## 🔧 关键配置说明
 
 ### 1. Provider设置
-- **重要**：必须设置为 `openai`，而不是 `custom`
-- 原因：NVIDIA API兼容OpenAI格式，使用OpenAI的调用方式
+- 通过环境变量 LLM_PROVIDER 设置
+- openai兼容格式(默认): 适用于NVIDIA/DeepSeek/GLM/OpenRouter等
+- anthropic: Claude系列
+- custom: 自定义端点
 
 ### 2. API Base设置
-- 设置为：`https://integrate.api.nvidia.com/v1`
-- 不要包含 `/chat/completions`，代码会自动添加
+- 通过环境变量 LLM_API_BASE 设置
+- 代码会自动拼接 /chat/completions 或 /messages
 
 ### 3. Model Name设置
-- 使用：`meta/llama-3.1-405b-instruct`
-- 这是NVIDIA平台上可用的模型之一
+- 通过环境变量 LLM_MODEL_NAME 设置
 
 ### 4. Timeout设置
 - 设置为：`120` 秒
@@ -135,7 +136,7 @@ csa chat
 **原因**：模型名称错误
 
 **解决**：
-1. 使用正确的模型名称：`meta/llama-3.1-405b-instruct`
+1. 使用正确的模型名称（通过LLM_MODEL_NAME环境变量设置）
 2. 检查NVIDIA平台可用的模型
 
 ### 问题4：超时错误
@@ -151,10 +152,8 @@ csa chat
 
 ```yaml
 ai:
-  provider: "openai"
-  api_key: "你的NVIDIA API密钥"
-  api_base: "https://integrate.api.nvidia.com/v1"
-  model_name: "meta/llama-3.1-405b-instruct"
+  provider: "openai"  # NVIDIA兼容OpenAI格式
+  # api_key, api_base, model_name 通过环境变量设置
   temperature: 0.7
   max_tokens: 2000
   timeout: 120
@@ -181,4 +180,4 @@ cd /Users/a1234/.hermes/skills/devops/changshu-dev-assistant
 **配置时间**: 2026-04-26
 **版本**: v1.2
 **状态**: ✅ NVIDIA API配置成功
-**模型**: meta/llama-3.1-405b-instruct
+**模型**: 通过环境变量LLM_MODEL_NAME设置
