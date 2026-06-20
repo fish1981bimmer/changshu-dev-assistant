@@ -113,6 +113,15 @@ python3 scripts/changshu_assistant_main.py search tags "tag1" "tag2" --path ~/wi
 ```
 
 ### 5. 模型监控 + Prompt模板
+
+**LLM配置方式**：环境变量优先于config.yaml，不硬编码模型名/API地址。
+```bash
+export LLM_PROVIDER=openai       # openai兼容格式(默认)/anthropic/custom
+export LLM_API_KEY=***       # 勿明文写文件
+export LLM_API_BASE=https://xxx/v1
+export LLM_MODEL_NAME=your-model
+```
+
 ```bash
 # 模型使用统计
 python3 scripts/model_monitor.py stats
@@ -159,6 +168,29 @@ changshu-dev-assistant/
 | test_automation_tool.py | 致命BUG — 文件以markdown标记开头无法执行 |
 | test_automation_example.py | Stub — 仅打印说明文本 |
 | test_automation_integration.py | 冗余 — 纯包装层无额外价值 |
+
+## 核心教训（v3.0重构血泪）
+
+### ⚠️ 假数据模块比没有更危险
+`ai_enhanced_client.py` 的 `_call_provider_api()` 返回硬编码假字符串"这是模拟的AI响应"。主程序 `try: from ai_enhanced_client import EnhancedLLMClient` 优先使用它 → 一旦import成功，所有AI调用都返回假数据。**原则**：宁可不写模块也不要写返回假数据的模块——假数据模块会被import后污染真实流程。
+
+### ⚠️ SKILL.md虚构功能的危害
+v2.x的SKILL.md声称有"错误诊断系统"、"DevOps自动化"、"项目管理助手"等8大功能，但代码中没有一个实现。FAQ中的命令(diagnose-error, security-scan, docker-gen, cicd, project-plan)在代码中不存在。**原则**：SKILL.md只写已实现的功能，虚构功能描述会误导用户且增加维护债。
+
+### ⚠️ 绝不能让main()调用不存在的方法
+v2.x的main()调用`assistant.init()`, `assistant.test_generate()`, `assistant.test_run()`, `assistant.test_analyze()`但ChangshuAssistant类没有这些方法 → 运行直接AttributeError。**原则**：每次修改类接口后必须grep检查所有调用点。
+
+### ⚠️ 做减法比做加法更重要
+v2.x有12个脚本但6个是stub/冗余，不如6个全部真实可用的脚本。**原则**：重构时优先删虚功能而不是加新功能——一个可信赖的小工具集比一堆半成品更有价值。
+
+### ⚠️ 模型/API硬编码是安全漏洞和迁移障碍
+v3.0的`LLMClient`默认model_name为`gpt-3.5-turbo`，api_base回退到`https://api.openai.com/v1`和`https://api.anthropic.com/v1`；config.yaml明文暴露NVIDIA API Key；model_selection.json列出已淘汰模型(gemma-7b/mistral-7b/llama2-70b/yi-34b)且无代码引用。**原则**：
+1. 代码中不硬编码模型名/API地址，用环境变量优先: `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_API_BASE` / `LLM_MODEL_NAME`
+2. config.yaml中provider/api_key/api_base/model_name置空，注释引导用环境变量
+3. API Key绝不写进文件(包括yaml/md)，一律走环境变量
+4. provider路由: anthropic走专用格式，其他(NVIDIA/DeepSeek/GLM/OpenRouter等)默认走openai兼容格式，不硬编码provider值
+5. 无api_base时报明确错误，不回退到openai/anthropic默认URL
+6. 孤立JSON(如model_selection.json)无代码引用则删除
 
 ## 更新日志
 
