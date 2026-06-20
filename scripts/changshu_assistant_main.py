@@ -45,18 +45,34 @@ from prompt_template_manager import PromptTemplateManager
 # LLMClient — 大模型客户端
 # =====================================================================
 class LLMClient:
-    """大模型客户端"""
+    """大模型客户端 — 从config.yaml读取，无硬编码默认值"""
+
+    # 不再硬编码模型名/API地址，全部从config或环境变量读取
+    ENV_MAP = {
+        'provider': 'LLM_PROVIDER',
+        'api_key': 'LLM_API_KEY',
+        'api_base': 'LLM_API_BASE',
+        'model_name': 'LLM_MODEL_NAME',
+    }
 
     def __init__(self, config):
         self.config = config.get('ai', {})
-        self.provider = self.config.get('provider', 'openai')
-        self.api_key = self.config.get('api_key', '')
-        self.api_base = self.config.get('api_base', '')
-        self.model_name = self.config.get('model_name', 'gpt-3.5-turbo')
+        # 优先环境变量 → config.yaml → 无默认值(必须显式配置)
+        self.provider = self._resolve('provider')
+        self.api_key = self._resolve('api_key')
+        self.api_base = self._resolve('api_base')
+        self.model_name = self._resolve('model_name')
         self.temperature = self.config.get('temperature', 0.7)
         self.max_tokens = self.config.get('max_tokens', 2000)
         self.timeout = self.config.get('timeout', 30)
         self.logger = logging.getLogger(__name__)
+
+    def _resolve(self, key):
+        """按优先级解析: 环境变量 → config.yaml，都不存在返回空字符串"""
+        env_val = os.environ.get(self.ENV_MAP.get(key, ''), '')
+        if env_val:
+            return env_val
+        return self.config.get(key, '')
 
     def is_configured(self):
         """检查是否配置了API密钥"""
@@ -71,18 +87,15 @@ class LLMClient:
                 "tokens": {"prompt": 0, "completion": 0, "total": 0},
             }
         try:
-            if self.provider == 'openai':
-                return self._call_openai(prompt, system_prompt)
-            elif self.provider == 'anthropic':
+            # provider 决定API调用格式: openai格式 | anthropic格式 | 自定义端点
+            provider = (self.provider or '').lower()
+            if provider == 'anthropic':
                 return self._call_anthropic(prompt, system_prompt)
-            elif self.provider == 'custom':
+            elif provider == 'custom':
                 return self._call_custom_api(prompt, system_prompt)
             else:
-                return {
-                    "content": self._get_fallback_response(prompt),
-                    "model": "fallback",
-                    "tokens": {"prompt": 0, "completion": 0, "total": 0},
-                }
+                # 默认走openai兼容格式(NVIDIA/DeepSeek/GLM等都兼容)
+                return self._call_openai(prompt, system_prompt)
         except Exception as e:
             self.logger.error(f"调用大模型失败: {e}")
             return {
@@ -92,9 +105,14 @@ class LLMClient:
             }
 
     def _call_openai(self, prompt, system_prompt=None):
-        """调用OpenAI API"""
-        api_base = self.api_base or "https://api.openai.com/v1"
-        url = f"{api_base}/chat/completions"
+        """调用OpenAI兼容API (支持NVIDIA/DeepSeek等任何OpenAI格式端点)"""
+        if not self.api_base:
+            return {
+                "content": "错误: 未配置api_base，请在config.yaml的ai段或环境变量LLM_API_BASE中设置",
+                "model": "error",
+                "tokens": {"prompt": 0, "completion": 0, "total": 0},
+            }
+        url = f"{self.api_base}/chat/completions"
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
@@ -141,9 +159,14 @@ class LLMClient:
         }
 
     def _call_anthropic(self, prompt, system_prompt=None):
-        """调用Anthropic API"""
-        api_base = self.api_base or "https://api.anthropic.com/v1"
-        url = f"{api_base}/messages"
+        """调用Anthropic兼容API"""
+        if not self.api_base:
+            return {
+                "content": "错误: 未配置api_base，请在config.yaml的ai段或环境变量LLM_API_BASE中设置",
+                "model": "error",
+                "tokens": {"prompt": 0, "completion": 0, "total": 0},
+            }
+        url = f"{self.api_base}/messages"
         headers = {
             "x-api-key": self.api_key,
             "anthropic-version": "2023-06-01",
